@@ -27,14 +27,14 @@ namespace ToDoList.Controllers
       return View(Category.GetAll());
     }
 
-    [HttpGet("/categories/{id}/items")]
-    public ActionResult List(int id)
-    {
-      Category thisCategory = Category.Find(id);
-
-      List<Item> allItems = thisCategory.GetItems();
-      return View(thisCategory);
-    }
+    // [HttpGet("/categories/{id}/items")]
+    // public ActionResult List(int id)
+    // {
+    //   Category thisCategory = Category.Find(id);
+    //
+    //   List<Item> allItems = thisCategory.GetItems();
+    //   return View(thisCategory);
+    // }
 
   }
 }

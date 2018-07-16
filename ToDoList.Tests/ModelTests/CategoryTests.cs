@@ -76,24 +76,86 @@ namespace ToDoList.Tests
       //Assert
       Assert.AreEqual(testCategory, foundCategory);
     }
-
     [TestMethod]
-    public void GetItems_RetrievesAllItemsWithCategory_ItemList()
+    public void Delete_DeleteCategoryAssociationsFromDatabase_CategoryList()
     {
+      //Arrange
+      Item testItem = new Item("Mow the lawn", "right meow");
+
+      testItem.Save();
+
+      string testName = "Home stuff";
+      Category testCategory = new Category(testName);
+      testCategory.Save();
+
+      //Act
+      testCategory.AddItem(testItem);
+      testCategory.Delete();
+
+      List<Category> resultItemCategories = testItem.GetCategories();
+      List<Category> testItemCategories = new List<Category> {};
+
+      //Assert
+      CollectionAssert.AreEqual(testItemCategories, resultItemCategories);
+    }
+    [TestMethod]
+    public void Test_AddItem_AddsItemToCategory()
+    {
+      //Arrange
       Category testCategory = new Category("Household chores");
       testCategory.Save();
 
-      Item firstItem = new Item("Mow the lawn", "now", testCategory.GetId());
-      firstItem.Save();
-      Item secondItem = new Item("Do the dishes", "dude", testCategory.GetId());
-      secondItem.Save();
+      Item testItem = new Item("Mow the lawn", "meow");
+      testItem.Save();
 
-      List<Item> testItemList = new List<Item> {firstItem, secondItem};
-      List<Item> resultItemList = testCategory.GetItems();
-    
+      Item testItem2 = new Item("Water the garden", "meow");
+      testItem2.Save();
 
-      CollectionAssert.AreEqual(testItemList, resultItemList);
+      //Act
+      testCategory.AddItem(testItem);
+      testCategory.AddItem(testItem2);
+
+      List<Item> result = testCategory.GetItems();
+      List<Item> testList = new List<Item>{testItem, testItem2};
+
+      //Assert
+      CollectionAssert.AreEqual(testList, result);
     }
+    [TestMethod]
+    public void GetItems_ReturnAllCategoryItems_ItemList()
+    {
+      //Arrange
+      Category testCategory = new Category("Household chores");
+      testCategory.Save();
+
+      Item testItem1 = new Item("Mow the lawn", "meow");
+      testItem1.Save();
+
+      //Act
+      testCategory.AddItem(testItem1);
+      List<Item> savedItems = testCategory.GetItems();
+      List<Item> testList = new List<Item> {testItem1};
+
+      //Assert
+      CollectionAssert.AreEqual(testList, savedItems);
+    }
+    // [TestMethod]
+    // public void GetItems_RetrievesAllItemsWithCategory_ItemList()
+    // {
+    //   Category testCategory = new Category("Household chores");
+    //   testCategory.Save();
+    //
+    //   Item firstItem = new Item("Mow the lawn", "now", testCategory.GetId());
+    //   firstItem.Save();
+    //   Item secondItem = new Item("Do the dishes", "dude", testCategory.GetId());
+    //   secondItem.Save();
+    //
+    //   List<Item> testItemList = new List<Item> {firstItem, secondItem};
+    //   List<Item> resultItemList = testCategory.GetItems();
+    //
+    //
+    //   CollectionAssert.AreEqual(testItemList, resultItemList);
+    // }
 
     public void Dispose()
     {
