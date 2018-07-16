@@ -7,9 +7,9 @@ namespace ToDoList.Controllers
   public class ItemController : Controller
   {
     [HttpPost("/items")]
-    public ActionResult CollectInfo(string newitem, string newdate, int category)
+    public ActionResult CollectInfo(string newitem, string newdate)
     {
-      Item newItem = new Item(newitem, newdate, category);
+      Item newItem = new Item(newitem, newdate);
       newItem.Save();
       // List<Item> all = Item.GetAll();
       return RedirectToAction("Index");

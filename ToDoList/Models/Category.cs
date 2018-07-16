@@ -115,45 +115,29 @@ namespace ToDoList.Models
       MySqlConnection conn = DB.Connection();
       conn.Open();
       var cmd = conn.CreateCommand() as MySqlCommand;
-      cmd.CommandText = @"SELECT item_id FROM categories_items WHERE category_id = @CategoryId;";
+      cmd.CommandText = @"SELECT items.* FROM categories
+      JOIN categories_items ON (categories.id = categories_items.category_id)
+      JOIN items ON (categories_items.item_id = items.id)
+      WHERE categories.id = @CategoryId;";
 
       MySqlParameter categoryIdParameter = new MySqlParameter();
       categoryIdParameter.ParameterName = "@CategoryId";
       categoryIdParameter.Value = _id;
       cmd.Parameters.Add(categoryIdParameter);
 
-      var rdr = cmd.ExecuteReader() as MySqlDataReader;
+      MySqlDataReader rdr = cmd.ExecuteReader() as MySqlDataReader;
+      List<Item> items = new List<Item>{};
 
-      List<int> itemIds = new List<int> {};
       while(rdr.Read())
       {
         int itemId = rdr.GetInt32(0);
-        itemIds.Add(itemId);
+        string itemDescription = rdr.GetString(1);
+        string itemDueDate = rdr.GetString(2);
+        bool itemCheckOff = rdr.GetBoolean(3);
+        Item newItem = new Item(itemDescription, itemDueDate, itemCheckOff, itemId);
+        items.Add(newItem);
       }
-      rdr.Dispose();
 
-      List<Item> items = new List<Item> {};
-      foreach (int itemId in itemIds)
-      {
-        var itemQuery = conn.CreateCommand() as MySqlCommand;
-        itemQuery.CommandText = @"SELECT * FROM items WHERE id = @ItemId;";
-
-        MySqlParameter itemIdParameter = new MySqlParameter();
-        itemIdParameter.ParameterName = "@ItemId";
-        itemIdParameter.Value = itemId;
-        itemQuery.Parameters.Add(itemIdParameter);
-
-        var itemQueryRdr = itemQuery.ExecuteReader() as MySqlDataReader;
-        while(itemQueryRdr.Read())
-        {
-          int thisItemId = itemQueryRdr.GetInt32(0);
-          string itemDescription = itemQueryRdr.GetString(1);
-          string itemDueDate =  itemQueryRdr.GetString(2);
-          Item foundItem = new Item(itemDescription, itemDueDate, thisItemId);
-          items.Add(foundItem);
-        }
-        itemQueryRdr.Dispose();
-      }
       conn.Close();
       if (conn != null)
       {
@@ -167,7 +151,7 @@ namespace ToDoList.Models
       MySqlConnection conn = DB.Connection();
       conn.Open();
       var cmd = conn.CreateCommand() as MySqlCommand;
-      cmd.CommandText = @"DELETE FROM categories;";
+      cmd.CommandText = @"DELETE FROM categories; DELETE FROM categories_items;";
       cmd.ExecuteNonQuery();
       conn.Close();
       if (conn != null)

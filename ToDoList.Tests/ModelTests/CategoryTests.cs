@@ -139,23 +139,24 @@ namespace ToDoList.Tests
       //Assert
       CollectionAssert.AreEqual(testList, savedItems);
     }
-    // [TestMethod]
-    // public void GetItems_RetrievesAllItemsWithCategory_ItemList()
-    // {
-    //   Category testCategory = new Category("Household chores");
-    //   testCategory.Save();
-    //
-    //   Item firstItem = new Item("Mow the lawn", "now", testCategory.GetId());
-    //   firstItem.Save();
-    //   Item secondItem = new Item("Do the dishes", "dude", testCategory.GetId());
-    //   secondItem.Save();
-    //
-    //   List<Item> testItemList = new List<Item> {firstItem, secondItem};
-    //   List<Item> resultItemList = testCategory.GetItems();
-    //
-    //
-    //   CollectionAssert.AreEqual(testItemList, resultItemList);
-    // }
+    [TestMethod]
+    public void GetItems_RetrievesAllItemsWithCategory_ItemList()
+    {
+      Category testCategory = new Category("Household chores");
+      testCategory.Save();
+
+      Item firstItem = new Item("Mow the lawn", "now");
+      firstItem.Save();
+      testCategory.AddItem(firstItem);
+      Item secondItem = new Item("Do the dishes", "dude");
+      secondItem.Save();
+      testCategory.AddItem(secondItem);
+
+      List<Item> testItemList = new List<Item> {firstItem, secondItem};
+      List<Item> resultItemList = testCategory.GetItems();
+
+      CollectionAssert.AreEqual(testItemList, resultItemList);
+    }
 
     public void Dispose()
     {

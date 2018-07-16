@@ -185,5 +185,19 @@ namespace ToDoList.Tests
       //Assert
       CollectionAssert.AreEqual(testCategoryItems, resultCategoryItems);
     }
+
+    [TestMethod]
+    public void Done_ChangesValueOfCheckOffandChangesBitValueinTABLE()
+    {
+      //Arrange
+      Item testItem1 = new Item("hisato walks", "now");
+      testItem1.Save();
+
+      //Act
+      testItem1.Done();
+
+      //Assert
+    Assert.AreEqual(true, testItem1.GetCheckOff());
+    }
   }
 }

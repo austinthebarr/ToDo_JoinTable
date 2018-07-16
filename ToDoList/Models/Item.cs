@@ -10,12 +10,14 @@ namespace ToDoList.Models
     private int _id;
     private string _description;
     private string _dueDate;
+    private bool _checkOff;
 
-    public Item (string Description, string DueDate, int Id = 0)
+    public Item (string Description, string DueDate, bool CheckOff = false, int Id = 0)
     {
       _id = Id;
       _description = Description;
       _dueDate = DueDate;
+      _checkOff = CheckOff;
     }
 
     public override bool Equals(System.Object otherItem)
@@ -30,6 +32,7 @@ namespace ToDoList.Models
         bool idEquality = (this.GetId() == newItem.GetId());
         bool descriptionEquality = (this.GetDescription() == newItem.GetDescription());
         bool dueDateEquality = (this.GetDueDate() == newItem.GetDueDate());
+        bool checkOffEquality = (this.GetCheckOff() == newItem.GetCheckOff());
         return (idEquality && descriptionEquality);
       }
     }
@@ -55,6 +58,16 @@ namespace ToDoList.Models
     public string GetDueDate()
     {
       return _dueDate;
+    }
+
+    public bool GetCheckOff()
+    {
+      return _checkOff;
+    }
+
+    public void SetCheckOff(bool Value)
+    {
+      _checkOff = Value;
     }
 
     public void AddCategory(Category newCategory)
@@ -87,44 +100,27 @@ namespace ToDoList.Models
       MySqlConnection conn = DB.Connection();
       conn.Open();
       var cmd = conn.CreateCommand() as MySqlCommand;
-      cmd.CommandText = @"SELECT category_id FROM categories_items WHERE item_id = @ItemId;";
+      cmd.CommandText = @"SELECT categories.* FROM items
+      JOIN categories_items ON (items.id = categories_items.item_id)
+      JOIN categories ON (categories_items.category_id = categories.id)
+      WHERE items.id = @itemId;";
 
       MySqlParameter itemIdParameter = new MySqlParameter();
       itemIdParameter.ParameterName = "@itemId";
       itemIdParameter.Value = _id;
       cmd.Parameters.Add(itemIdParameter);
 
-      var rdr = cmd.ExecuteReader() as MySqlDataReader;
+      MySqlDataReader rdr = cmd.ExecuteReader() as MySqlDataReader;
+      List<Category> categories = new List<Category>{};
 
-      List<int> categoryIds = new List<int> {};
       while(rdr.Read())
       {
         int categoryId = rdr.GetInt32(0);
-        categoryIds.Add(categoryId);
+        string categoryName = rdr.GetString(1);
+        Category newCategory = new Category(categoryName, categoryId);
+        categories.Add(newCategory);
       }
-      rdr.Dispose();
 
-      List<Category> categories = new List<Category> {};
-      foreach (int categoryId in categoryIds)
-      {
-        var categoryQuery = conn.CreateCommand() as MySqlCommand;
-        categoryQuery.CommandText = @"SELECT * FROM categories WHERE id = @CategoryId;";
-
-        MySqlParameter categoryIdParameter = new MySqlParameter();
-        categoryIdParameter.ParameterName = "@CategoryId";
-        categoryIdParameter.Value = categoryId;
-        categoryQuery.Parameters.Add(categoryIdParameter);
-
-        var categoryQueryRdr = categoryQuery.ExecuteReader() as MySqlDataReader;
-        while(categoryQueryRdr.Read())
-        {
-          int thisCategoryId = categoryQueryRdr.GetInt32(0);
-          string categoryName = categoryQueryRdr.GetString(1);
-          Category foundCategory = new Category(categoryName, thisCategoryId);
-          categories.Add(foundCategory);
-        }
-        categoryQueryRdr.Dispose();
-      }
       conn.Close();
       if (conn != null)
       {
@@ -167,7 +163,7 @@ namespace ToDoList.Models
       conn.Open();
 
       var cmd = conn.CreateCommand() as MySqlCommand;
-      cmd.CommandText = @"DELETE FROM items;";
+      cmd.CommandText = @"DELETE FROM items; DELETE FROM categories_items";
 
       cmd.ExecuteNonQuery();
 
@@ -176,7 +172,7 @@ namespace ToDoList.Models
       {
         conn.Dispose();
       }
-    }
+   }
 
     public static Item Find(int id)
     {
@@ -196,15 +192,17 @@ namespace ToDoList.Models
       int itemId = 0;
       string itemDescription = "";
       string itemDueDate = "";
+      bool itemCheckOff = false;
 
       while (rdr.Read())
       {
         itemId = rdr.GetInt32(0);
         itemDescription = rdr.GetString(1);
         itemDueDate = rdr.GetString(2);
+        itemCheckOff = rdr.GetBoolean(3);
       }
 
-      Item foundItem = new Item(itemDescription, itemDueDate, itemId);
+      Item foundItem = new Item(itemDescription, itemDueDate, itemCheckOff, itemId);
 
       conn.Close();
       if (conn != null)
@@ -227,11 +225,12 @@ namespace ToDoList.Models
         int itemId = rdr.GetInt32(0);
         string itemDescription = rdr.GetString(1);
         string itemDueDate = "";
+        bool itemCheckOff = false;
         if(!rdr.IsDBNull(2))
         {
           itemDueDate = rdr.GetString(2);
         }
-        Item newItem = new Item(itemDescription, itemDueDate, itemId);
+        Item newItem = new Item(itemDescription, itemDueDate, itemCheckOff, itemId);
         allItems.Add(newItem);
       }
       conn.Close();
@@ -280,6 +279,23 @@ namespace ToDoList.Models
       itemIdParameter.ParameterName = "@ItemId";
       itemIdParameter.Value = this.GetId();
       cmd.Parameters.Add(itemIdParameter);
+
+      cmd.ExecuteNonQuery();
+
+      conn.Close();
+      if (conn != null)
+      {
+        conn.Dispose();
+      }
+    }
+
+    public void Done()
+    {
+      this.SetCheckOff(true);
+      MySqlConnection conn = DB.Connection();
+      conn.Open();
+      var cmd = conn.CreateCommand() as MySqlCommand;
+      cmd.CommandText = @"UPDATE items SET checkoff = 1;";
 
       cmd.ExecuteNonQuery();
 
