@@ -295,7 +295,12 @@ namespace ToDoList.Models
       MySqlConnection conn = DB.Connection();
       conn.Open();
       var cmd = conn.CreateCommand() as MySqlCommand;
-      cmd.CommandText = @"UPDATE items SET checkoff = 1;";
+      cmd.CommandText = @"UPDATE items SET checkoff = 1 WHERE id = @ItemId;";
+
+      MySqlParameter itemIdParameter = new MySqlParameter();
+      itemIdParameter.ParameterName = "@ItemId";
+      itemIdParameter.Value = this.GetId();
+      cmd.Parameters.Add(itemIdParameter);
 
       cmd.ExecuteNonQuery();
 

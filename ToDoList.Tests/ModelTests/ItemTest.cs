@@ -199,5 +199,20 @@ namespace ToDoList.Tests
       //Assert
     Assert.AreEqual(true, testItem1.GetCheckOff());
     }
+
+    [TestMethod]
+    public void Done_ChangesValueOfCheckOffandChangesBitValueinTABLE_fail()
+    {
+      //Arrange
+      Item testItem1 = new Item("hisato walks", "now");
+      testItem1.Save();
+      Item testItem2 = new Item("hisato talks", "now");
+      testItem2.Save();
+      //Act
+      testItem1.Done();
+
+      //Assert
+    Assert.AreEqual(false, testItem2.GetCheckOff());
+    }
   }
 }
