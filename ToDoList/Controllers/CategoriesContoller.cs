@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using ToDoList.Models;
+using System;
 
 namespace ToDoList.Controllers
 {
@@ -18,7 +19,7 @@ namespace ToDoList.Controllers
       Category newCategory = new Category(Request.Form["new-category"]);
       newCategory.Save();
       List<Category> allCategories = Category.GetAll();
-      return RedirectToAction("Success", "Home");
+      return RedirectToAction("success", "");
     }
 
     [HttpGet("/categories")]
@@ -44,10 +45,10 @@ namespace ToDoList.Controllers
     public ActionResult AddItem(int categoryId)
     {
       Category category = Category.Find(categoryId);
-      Item item = Item.Find(int32.Parse(Request.Form["item-id"]));
+      Item item = Item.Find(Int32.Parse(Request.Form["item-id"]));
       category.AddItem(item);
       return RedirectToAction("Details", new {id = categoryId});
-    }  
+    }
 
   }
 }

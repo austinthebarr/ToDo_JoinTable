@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using ToDoList.Models;
-
+using System;
 namespace ToDoList.Controllers
 {
   public class ItemController : Controller
@@ -18,8 +18,8 @@ namespace ToDoList.Controllers
     [HttpGet("/items")]
     public ActionResult Index()
     {
-      // List<Item> all = Item.GetAll();
-      return View(Item.GetAll());
+      List<Item> all = Item.GetAll();
+      return View(all);
     }
 
     [HttpGet("/items/new")]
