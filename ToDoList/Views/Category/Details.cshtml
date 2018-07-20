@@ -1,0 +1,27 @@
+@using ToDoList.Models;
+
+<h1>To Do List</h1>
+<h2>Category: @Model["selectedCategory"].GetName()</h2>
+@if (@Model["categoryItems"].Count != 0)
+{
+  <h4>Here are all the items in this category:</h4>
+  <ul>
+    @foreach (var item in @Model["categoryItems"])
+    {
+      <li>@item.GetDescription()</li>
+    }
+  </ul>
+}
+<h4>Add a item to this category:</h4>
+<form action='/categories/@Model["selectedCategory"].GetId()/items/new' method='post'>
+  <label for='item-id'>Select a item</label>
+  <select id='item-id' name='item-id' type='text'>
+    @foreach (var item in @Model["allItems"])
+    {
+      <option value="@item.GetId()">@item.GetDescription()</option>
+
+    }
+  </select>
+  <button type='submit'>Add</button>
+</form>
+<p><a href="/">Return to Main Page</a></p>
